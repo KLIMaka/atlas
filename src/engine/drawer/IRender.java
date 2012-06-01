@@ -8,7 +8,6 @@ import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 import javax.media.opengl.GL2ES2;
 
-import com.jogamp.opengl.util.glsl.ShaderProgram;
 import com.jogamp.opengl.util.texture.Texture;
 
 public interface IRender {
@@ -68,11 +67,11 @@ public interface IRender {
 
     public void drawQuads(IDrawBuffer buf, int[] idxs, int off, int count, int[] comps);
 
-    public ShaderProgram loadShader(String name);
+    public ShaderInfo loadShader(String name);
 
-    public void bindShader(ShaderProgram shader);
+    public void bindShader(String name);
 
-    public void unbindShader(ShaderProgram shader);
+    public void unbindShader();
 
     public void bindTexture(Texture tex);
 

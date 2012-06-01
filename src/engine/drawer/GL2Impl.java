@@ -25,11 +25,11 @@ public class GL2Impl implements IRender {
 
     private GL2                   m_gl;
 
-    private boolean               m_depthTest     = false;
-    private boolean               m_stencilTest   = false;
-    private boolean               m_blend         = false;
+    private boolean               m_depthTest        = false;
+    private boolean               m_stencilTest      = false;
+    private boolean               m_blend            = false;
 
-    private int                   m_currentBuffer = -1;
+    private int                   m_currentBuffer    = -1;
 
     private int                   m_stencilRef;
 
@@ -40,8 +40,11 @@ public class GL2Impl implements IRender {
     private int                   m_qvm;
     private int                   m_qpm;
 
-    private DefaultTransformer    m_projection    = new DefaultTransformer();
-    private ITransformer3D        m_transformer   = new DefaultTransformer();
+    private DefaultTransformer    m_projection       = new DefaultTransformer();
+    private ITransformer3D        m_transformer      = new DefaultTransformer();
+
+    private ShaderInfo            m_activeShader;
+    private ShadersController     m_shaderController = new ShadersController();
 
     public void setGL(GL2ES2 gl) {
         m_gl = gl.getGL2();
@@ -67,8 +70,8 @@ public class GL2Impl implements IRender {
     }
 
     @Override
-    public ShaderProgram loadShader(String name) {
-        return Shaders.loadShaderProgram(m_gl, name);
+    public ShaderInfo loadShader(String name) {
+        return m_shaderController.registerShader(name);
     }
 
     @Override
@@ -80,13 +83,15 @@ public class GL2Impl implements IRender {
     public void unbindTexture(Texture tex) {}
 
     @Override
-    public void bindShader(ShaderProgram shader) {
-        shader.useProgram(m_gl, true);
+    public void bindShader(String name) {
+        m_activeShader = m_shaderController.registerShader(name);
+        m_activeShader.bind();
     }
 
     @Override
-    public void unbindShader(ShaderProgram shader) {
-        shader.useProgram(m_gl, false);
+    public void unbindShader() {
+        m_activeShader.unbind();
+        m_activeShader = null;
     }
 
     public void drawSprites(IDrawBuffer buf, int[] idxs, int[] comps) {
@@ -180,16 +185,17 @@ public class GL2Impl implements IRender {
         m_gl.glClear(mask);
     }
 
-    protected void syncronizeState(boolean local, boolean newState, int cap) {
+    protected boolean syncronizeState(boolean local, boolean newState, int cap) {
         if (newState != local) {
             if (newState) {
                 m_gl.glEnable(cap);
-                local = true;
+                return true;
             } else {
                 m_gl.glDisable(cap);
-                local = false;
+                return false;
             }
         }
+        return local;
     }
 
     @Override
@@ -233,23 +239,23 @@ public class GL2Impl implements IRender {
 
         switch (mode) {
         case MODE_OFF:
-            syncronizeState(m_stencilTest, false, GL.GL_STENCIL_TEST);
+            m_stencilTest = syncronizeState(m_stencilTest, false, GL.GL_STENCIL_TEST);
             break;
 
         case STENCIL_MODE_MASK:
-            syncronizeState(m_stencilTest, true, GL.GL_STENCIL_TEST);
+            m_stencilTest = syncronizeState(m_stencilTest, true, GL.GL_STENCIL_TEST);
             m_gl.glStencilOp(GL.GL_KEEP, GL.GL_KEEP, GL.GL_KEEP);
             m_gl.glStencilFunc(GL.GL_NOTEQUAL, m_stencilRef, 0xff);
             break;
 
         case STENCIL_MODE_WRITE:
-            syncronizeState(m_stencilTest, true, GL.GL_STENCIL_TEST);
+            m_stencilTest = syncronizeState(m_stencilTest, true, GL.GL_STENCIL_TEST);
             m_gl.glStencilOp(GL.GL_KEEP, GL.GL_KEEP, GL.GL_REPLACE);
             m_gl.glStencilFunc(GL.GL_ALWAYS, m_stencilRef, 0xff);
             break;
 
         case STENCIL_MODE_ONCE:
-            syncronizeState(m_stencilTest, true, GL.GL_STENCIL_TEST);
+            m_stencilTest = syncronizeState(m_stencilTest, true, GL.GL_STENCIL_TEST);
             m_gl.glStencilOp(GL.GL_KEEP, GL.GL_KEEP, GL.GL_REPLACE);
             m_gl.glStencilFunc(GL.GL_NOTEQUAL, m_stencilRef, 0xff);
             break;
@@ -261,21 +267,21 @@ public class GL2Impl implements IRender {
 
         switch (mode) {
         case MODE_OFF:
-            syncronizeState(m_blend, false, GL.GL_BLEND);
+            m_blend = syncronizeState(m_blend, false, GL.GL_BLEND);
             break;
 
         case BLEND_MODE_ADD:
-            syncronizeState(m_blend, true, GL.GL_BLEND);
+            m_blend = syncronizeState(m_blend, true, GL.GL_BLEND);
             m_gl.glBlendFunc(GL.GL_ONE, GL.GL_ONE);
             break;
 
         case BLEND_MODE_MUL:
-            syncronizeState(m_blend, true, GL.GL_BLEND);
+            m_blend = syncronizeState(m_blend, true, GL.GL_BLEND);
             m_gl.glBlendFunc(GL.GL_DST_COLOR, GL.GL_ZERO);
             break;
 
         case BLEND_MODE_TRANS:
-            syncronizeState(m_blend, true, GL.GL_BLEND);
+            m_blend = syncronizeState(m_blend, true, GL.GL_BLEND);
             m_gl.glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
             break;
         }

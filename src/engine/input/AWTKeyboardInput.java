@@ -12,7 +12,7 @@ public class AWTKeyboardInput {
 
         public void keyReleased(KeyEvent e);
 
-        public void keyPRessed(KeyEvent e);
+        public void keyPressed(KeyEvent e);
     }
 
     private AtlasKeyListener m_keyListener;
@@ -33,7 +33,7 @@ public class AWTKeyboardInput {
 
             @Override
             public void keyPressed(KeyEvent e) {
-                if (m_keyListener != null) m_keyListener.keyPRessed(e);
+                if (m_keyListener != null) m_keyListener.keyPressed(e);
             }
 
         });

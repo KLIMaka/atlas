@@ -7,12 +7,12 @@ import java.io.IOException;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
-import com.jogamp.opengl.util.glsl.ShaderProgram;
 import com.jogamp.opengl.util.texture.Texture;
 import com.jogamp.opengl.util.texture.TextureIO;
 
 import engine.buffers.IDrawBuffer;
 import engine.drawer.IRender;
+import engine.drawer.ShaderInfo;
 import engine.drawer.accsessors.IFloatBufferAccessor;
 import engine.text.CircualrHeap.entry;
 import engine.text.lines.Caret;
@@ -33,17 +33,7 @@ public class TextRender {
     private IFloatBufferAccessor m_aPosSize;
     private IFloatBufferAccessor m_aTex;
 
-    private ShaderProgram        m_shader;
-    private int                  m_qvm;
-    private int                  m_qpm;
-    private int                  m_fcolor;
-    private int                  m_bcolor;
-    private int                  m_thickness;
-    private int                  m_lineHeight;
-    private int                  m_curLine;
-    private int                  m_startLine;
-    private int                  m_clipWindow;
-
+    private ShaderInfo           m_shader;
     private CircualrHeap         m_heap       = new CircualrHeap(max_count);
     private boolean              m_needUpdate = true;
 
@@ -75,19 +65,9 @@ public class TextRender {
     private void setupShader() {
 
         m_shader = m_render.loadShader("font");
-        m_render.bindShader(m_shader);
-        int font = m_render.gl().glGetUniformLocation(m_shader.program(), "font");
-        m_qvm = m_render.gl().glGetUniformLocation(m_shader.program(), "v_matrix");
-        m_qpm = m_render.gl().glGetUniformLocation(m_shader.program(), "p_matrix");
-        m_fcolor = m_render.gl().glGetUniformLocation(m_shader.program(), "fcolor");
-        m_bcolor = m_render.gl().glGetUniformLocation(m_shader.program(), "bcolor");
-        m_thickness = m_render.gl().glGetUniformLocation(m_shader.program(), "thickness");
-        m_lineHeight = m_render.gl().glGetUniformLocation(m_shader.program(), "lineHeight");
-        m_startLine = m_render.gl().glGetUniformLocation(m_shader.program(), "startLine");
-        m_curLine = m_render.gl().glGetUniformLocation(m_shader.program(), "curLine");
-        m_clipWindow = m_render.gl().glGetUniformLocation(m_shader.program(), "clipWindow");
-        m_render.gl().glUniform1i(font, 0);
-        m_render.unbindShader(m_shader);
+        m_shader.bind();
+        m_shader.uniform("font", 0);
+        m_shader.unbind();
     }
 
     private void createBuffers() {
@@ -110,37 +90,34 @@ public class TextRender {
         m_aTex = (IFloatBufferAccessor) m_buffer.getAccsessor(2);
     }
 
-    public void put(char c) {
-        m_needUpdate = true;
-        m_caret.put(c);
-    }
-
     public void setLineHeight(float h) {
-        m_render.bindShader(m_shader);
-        m_render.gl().glUniform1f(m_lineHeight, h);
-        m_render.unbindShader(m_shader);
+
+        m_shader.bind();
+        m_shader.uniform("lineHeight", h);
+        m_shader.unbind();
     }
 
     public void setColor(float r, float g, float b, float a) {
 
-        m_render.bindShader(m_shader);
-        m_render.gl().glUniform4f(m_fcolor, r, g, b, a);
-        m_render.unbindShader(m_shader);
+        m_shader.bind();
+        m_shader.uniform("fcolor", r, g, b, a);
+        m_shader.unbind();
     }
 
     public void setWindow(float w, float h) {
-        m_render.bindShader(m_shader);
-        m_render.gl().glUniform2f(m_clipWindow, w, h);
-        m_render.unbindShader(m_shader);
-        // m_rows = (int) (h / 16) + 1;
+
+        m_shader.bind();
+        m_shader.uniform("clipWindow", w, h);
+        m_shader.unbind();
         m_needUpdate = true;
     }
 
     public void setThickness(float t) {
 
-        m_render.bindShader(m_shader);
-        m_render.gl().glUniform1f(m_thickness, t);
-        m_render.unbindShader(m_shader);
+        m_shader.bind();
+        m_shader.uniform("thickness", t);
+        m_shader.unbind();
+
     }
 
     protected void genIndexes(int start, int count) {
@@ -206,26 +183,25 @@ public class TextRender {
         precache();
 
         m_render.bindTexture(m_tex);
-        m_render.bindShader(m_shader);
-        m_render.gl().glUniformMatrix4fv(m_qpm, 1, true, m_render.proj().get(), 0);
-        m_render.gl().glUniformMatrix4fv(m_qvm, 1, true, m_render.trans().get(), 0);
-        m_render.gl().glUniform1i(m_startLine, m_topLineNum);
-        m_render.gl().glUniform4f(m_bcolor, 0.9f, 0.9f, 0.9f, 1.0f);
+        m_shader.bind();
+        m_shader.uniform("p_matrix", m_render.proj().get());
+        m_shader.uniform("v_matrix", m_render.trans().get());
+        m_shader.uniform("startLine", m_topLineNum);
+        m_shader.uniform("bcolor", 0.9f, 0.9f, 0.9f, 1.0f);
 
-        m_render.gl().glEnable(GL.GL_BLEND);
-        m_render.gl().glBlendFunc(GL.GL_SRC_ALPHA, GL.GL_ONE_MINUS_SRC_ALPHA);
+        m_render.setBlendMode(IRender.BLEND_MODE_TRANS);
 
         int ln = m_topLineNum;
         for (String line : m_topLine.limit(m_rows)) {
             entry ent = m_heap.get(line);
             if (ent == null) continue;
 
-            m_render.gl().glUniform1i(m_curLine, ln++);
+            m_shader.uniform("curLine", ln++);
             m_render.drawQuads(m_buffer, m_indexes, ent.start * 6, ent.length * 6, m_comps);
         }
 
-        m_render.gl().glDisable(GL.GL_BLEND);
-        m_render.unbindShader(m_shader);
+        m_render.setBlendMode(IRender.MODE_OFF);
+        m_shader.unbind();
     }
 
     public boolean isValid() {

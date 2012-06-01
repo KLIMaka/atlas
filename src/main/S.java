@@ -11,7 +11,6 @@ import javax.media.opengl.awt.GLCanvas;
 
 import engine.AtlasEngine;
 import engine.drawer.IRender;
-import engine.elements.Sprite;
 import engine.elements.SpriteFactory;
 import engine.input.AWTKeyboardInput.AtlasKeyListener;
 import engine.text.TextRender;
@@ -67,13 +66,9 @@ public class S extends AtlasEngine {
 
     public void draw(IRender draw) {
         draw.clear(IRender.COLOR);
-        int x = mouse.x();
-        int y = mouse.y();
 
         draw.trans().reset();
         draw.trans().translate(10, 0);
-
-        // text.setRow(mouse.z() * 5);
         text.draw();
     }
 
@@ -89,14 +84,6 @@ public class S extends AtlasEngine {
     public void init(IRender drawer) {
 
         drawer.setClearColor(new Vec4f(1, 1, 1, 0.0f));
-        sprites = new SpriteFactory(drawer);
-        for (int i = 0; i < count; i++) {
-            float x = (float) (Math.random() * 2.0f - 1.0f);
-            float y = (float) (Math.random() * 2.0f - 1.0f);
-            Sprite spr = sprites.create(10, 10);
-            spr.show();
-            spr.setPos(x * 600, y * 600);
-        }
 
         text = new TextRender("fonts/curier.fnt", drawer);
         text.setColor(0, 0, 0, 1);
@@ -118,7 +105,7 @@ public class S extends AtlasEngine {
             }
 
             @Override
-            public void keyPRessed(KeyEvent e) {
+            public void keyPressed(KeyEvent e) {
                 text.key(e);
             }
         });

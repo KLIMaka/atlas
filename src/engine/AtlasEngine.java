@@ -1,5 +1,6 @@
 package engine;
 
+import javax.media.opengl.GL2ES2;
 import javax.media.opengl.GLAutoDrawable;
 import javax.media.opengl.GLCapabilities;
 import javax.media.opengl.GLEventListener;
@@ -17,6 +18,8 @@ public class AtlasEngine implements GLEventListener {
     public MouseInput       mouse;
     public IRender          drawer;
     public AWTKeyboardInput keyboard;
+
+    public static GL2ES2    gl;
 
     public GLCanvas createAWTCanvas() {
 
@@ -46,7 +49,8 @@ public class AtlasEngine implements GLEventListener {
     @Override
     public void init(GLAutoDrawable drawable) {
         drawer = new GL2Impl();
-        drawer.setGL(drawable.getGL().getGL2ES2());
+        gl = drawable.getGL().getGL2ES2();
+        drawer.setGL(gl);
         drawer.gl().setSwapInterval(0);
         init(drawer);
     }
