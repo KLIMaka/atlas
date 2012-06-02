@@ -13,7 +13,7 @@ import engine.AtlasEngine;
 import engine.drawer.IRender;
 import engine.elements.SpriteFactory;
 import engine.input.AWTKeyboardInput.AtlasKeyListener;
-import engine.text.TextRender;
+import engine.text.MultilineTextRender;
 import gleem.linalg.Vec4f;
 
 public class S extends AtlasEngine {
@@ -21,7 +21,7 @@ public class S extends AtlasEngine {
     private static GLCanvas m_canvas;
 
     static SpriteFactory    sprites;
-    static TextRender       text;
+    static MultilineTextRender       text;
     static int              count = 999;
 
     static String           input = "";
@@ -85,7 +85,7 @@ public class S extends AtlasEngine {
 
         drawer.setClearColor(new Vec4f(1, 1, 1, 0.0f));
 
-        text = new TextRender("fonts/curier.fnt", drawer);
+        text = new MultilineTextRender("fonts/curier.fnt", drawer);
         text.setColor(0, 0, 0, 1);
         text.setThickness(1.0f);
         text.setLineHeight(16.0f);

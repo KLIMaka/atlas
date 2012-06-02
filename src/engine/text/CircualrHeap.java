@@ -7,6 +7,7 @@ import java.util.TreeMap;
 public class CircualrHeap {
 
     public static class entry {
+
         public int    length;
         public int    start;
         public String id;
