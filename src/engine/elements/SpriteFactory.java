@@ -6,10 +6,9 @@ import java.util.Set;
 
 import javax.media.opengl.GL;
 
-import com.jogamp.opengl.util.glsl.ShaderProgram;
-
 import engine.buffers.IDrawBuffer;
 import engine.drawer.IRender;
+import engine.drawer.ShaderInfo;
 import engine.drawer.accsessors.IByteBufferAccessor;
 import engine.drawer.accsessors.IFloatBufferAccessor;
 import engine.elements.factory.IDFactory;
@@ -33,9 +32,7 @@ public class SpriteFactory extends IDFactory {
     protected final IFloatBufferAccessor m_aOrigin;
     protected final IByteBufferAccessor  m_aColor;
 
-    private ShaderProgram                m_shader;
-    private int                          m_qvm;
-    private int                          m_qpm;
+    private ShaderInfo                   m_shader;
 
     public SpriteFactory(IRender render) {
 
@@ -59,10 +56,6 @@ public class SpriteFactory extends IDFactory {
     private void setupShader() {
 
         m_shader = m_render.loadShader("baseq");
-        m_render.bindShader(m_shader);
-        m_qvm = m_render.gl().glGetUniformLocation(m_shader.program(), "v_matrix");
-        m_qpm = m_render.gl().glGetUniformLocation(m_shader.program(), "p_matrix");
-        m_render.unbindShader(m_shader);
     }
 
     private void fillBuffer() {
@@ -126,13 +119,13 @@ public class SpriteFactory extends IDFactory {
 
         if (m_updateIndexes) updateIndexes();
 
-        m_render.bindShader(m_shader);
-        m_render.gl().glUniformMatrix4fv(m_qpm, 1, true, m_render.proj().get(), 0);
-        m_render.gl().glUniformMatrix4fv(m_qvm, 1, true, m_render.trans().get(), 0);
+        m_shader.bind();
+        m_shader.uniform("p_matrix", m_render.proj().get());
+        m_shader.uniform("v_matrix", m_render.trans().get());
 
         m_render.drawQuads(m_buffer, m_indexes, 0, m_shown.size() * 6, m_comps);
 
-        m_render.unbindShader(m_shader);
+        m_shader.unbind();
     }
 
     public Sprite create(int w, int h) {
