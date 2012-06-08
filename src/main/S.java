@@ -11,6 +11,8 @@ import javax.media.opengl.awt.GLCanvas;
 
 import engine.AtlasEngine;
 import engine.drawer.IRender;
+import engine.elements.Panel;
+import engine.elements.PanelFactory;
 import engine.elements.SpriteFactory;
 import engine.input.AWTKeyboardInput.AtlasKeyListener;
 import engine.text.MultilineTextRender;
@@ -21,6 +23,8 @@ public class S extends AtlasEngine {
     private static GLCanvas m_canvas;
 
     static SpriteFactory    sprites;
+    static PanelFactory panels;
+    static Panel panel;
     static MultilineTextRender       text;
     static int              count = 999;
 
@@ -70,6 +74,9 @@ public class S extends AtlasEngine {
         draw.trans().reset();
         draw.trans().translate(10, 0);
         text.draw();
+        
+        panel.setRotation(r+=0.001f);
+        panels.draw(panel);
     }
 
     @Override
@@ -84,6 +91,12 @@ public class S extends AtlasEngine {
     public void init(IRender drawer) {
 
         drawer.setClearColor(new Vec4f(1, 1, 1, 0.0f));
+        
+        panels = new PanelFactory(drawer);
+        panel = panels.create();
+        panel.setRect(100, 200);
+        panel.setOrigin(50, 100);
+        panel.setPos(200,300);
 
         text = new MultilineTextRender("fonts/curier.fnt", drawer);
         text.setColor(0, 0, 0, 1);

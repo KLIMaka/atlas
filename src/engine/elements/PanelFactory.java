@@ -21,13 +21,12 @@ public class PanelFactory extends IDFactory {
     private IDrawBuffer            m_buffer;
     private int[]                  m_indexes;
     private final int[]            m_comps   = { 0, 1, 2 };
+    
+    private int m_lastIdx = 0;
 
     private ShaderInfo             m_shader;
 
     protected IFloatBufferAccessor m_aOrigin;
-    protected IFloatBufferAccessor m_aAngle;
-    protected IFloatBufferAccessor m_aPos;
-    protected IFloatBufferAccessor m_aSize;
     protected IFloatBufferAccessor m_aTex;
     protected IByteBufferAccessor  m_aColor;
 
@@ -50,17 +49,13 @@ public class PanelFactory extends IDFactory {
         setupShader();
 
         m_aOrigin = (IFloatBufferAccessor) m_buffer.getAccsessor(0);
-        m_aAngle = (IFloatBufferAccessor) m_buffer.getAccsessor(0, 2);
-        m_aPos = (IFloatBufferAccessor) m_buffer.getAccsessor(1);
-        m_aSize = (IFloatBufferAccessor) m_buffer.getAccsessor(1, 2);
-        m_aTex = (IFloatBufferAccessor) m_buffer.getAccsessor(2);
-        m_aColor = (IByteBufferAccessor) m_buffer.getAccsessor(3);
+        m_aTex = (IFloatBufferAccessor) m_buffer.getAccsessor(1);
+        m_aColor = (IByteBufferAccessor) m_buffer.getAccsessor(2);
     }
 
     private void setupBuffer() {
 
-        m_buffer.addComponent(3, GL.GL_FLOAT, max_count, false); // origin angle
-        m_buffer.addComponent(4, GL.GL_FLOAT, max_count, false); // pos size
+        m_buffer.addComponent(2, GL.GL_FLOAT, max_count, false); // origin
         m_buffer.addComponent(2, GL.GL_FLOAT, max_count, false); // texcoord
         m_buffer.addComponent(4, GL.GL_UNSIGNED_BYTE, max_count, true); // color
         m_buffer.allocate(GL2.GL_STREAM_DRAW);
@@ -84,20 +79,29 @@ public class PanelFactory extends IDFactory {
         m_shader = m_render.loadShader("panel");
     }
 
-    public void draw(int[] ids) {
+    private int getIdx(int count) {
+    	int i = m_lastIdx;
+    	m_lastIdx += count;
+    	return i;
+    }
 
+    public void draw(Panel p) {
+
+    	m_buffer.update();
         m_shader.bind();
         m_shader.uniform("p_matrix", m_render.proj().get());
         m_shader.uniform("v_matrix", m_render.trans().get());
+        m_shader.uniform("m_matrix", p.m_transform.get());
 
-        for (int id : ids) {
-            panelElement p = m_panels.get(id);
-            if (p == null) continue;
-
-            m_render.drawQuads(m_buffer, m_indexes, p.start * 6, p.count * 6, m_comps);
-        }
+        m_render.drawQuads(m_buffer, m_indexes, p.m_bufIdx * 6,  6, m_comps);
 
         m_shader.unbind();
+    }
+    
+    public Panel create() {
+    	Panel panel = new Panel(this, getIdx(1));
+    	register(panel);
+    	return panel;
     }
 
 }

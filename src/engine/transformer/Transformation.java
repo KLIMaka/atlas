@@ -44,10 +44,11 @@ public class Transformation {
     }
 
     public void translate(float x, float y, float z) {
-        Mat4f m = new Mat4f();
-        m.makeIdent();
-        m.setTranslation(new Vec3f(x, y, z));
-        m_mat.mul(m_mat, m);
+        //Mat4f m = new Mat4f();
+        //m.makeIdent();
+        //m.setTranslation(new Vec3f(x, y, z));
+        //m_mat.mul(m_mat, m);
+    	m_mat.setTranslation(new Vec3f(x,y,z));
     }
 
     public void rotate(float angle) {

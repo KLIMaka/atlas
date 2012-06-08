@@ -9,19 +9,22 @@ import engine.transformer.Transformation;
 public class Panel implements IElement, IMonadID, IMonadPos, IMonadRect, IMonadDrawable {
 
     private PanelFactory   m_parent;
-    private int            m_bufIdx;
+    protected int            m_bufIdx;
 
-    private float          m_w, m_h;
+    private float          m_w = 1.0f, m_h = 1.0f;
     private float          m_x, m_y;
     private float          m_angle;
     private float          m_ox, m_oy;
     private int            m_idx;
 
-    private Transformation m_transform = new Transformation();
+    protected Transformation m_transform = new Transformation();
 
     protected Panel(PanelFactory parent, int idx) {
         m_parent = parent;
         m_bufIdx = idx;
+        
+        float no[] = new float[] { 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f , 1.0f };
+        m_parent.m_aOrigin.putf(m_bufIdx, no);
     }
 
     @Override
@@ -99,20 +102,18 @@ public class Panel implements IElement, IMonadID, IMonadPos, IMonadRect, IMonadD
 
     @Override
     public void setPos(float x, float y) {
-        if (m_x != x || m_y != y) {
-            m_x = x;
-            m_y = y;
-            m_parent.m_aPos.put2f(m_bufIdx, m_x, m_y);
-        }
+        float dx = x - m_x;
+        float dy = y - m_y;
+        m_transform.translate(x, y);
+        m_x += dx;
+        m_y += dy;
     }
 
     @Override
     public void move(float dx, float dy) {
-        if (dx != 0.0f && dy != 0.0f) {
-            m_x += dx;
-            m_y += dy;
-            m_parent.m_aPos.put2f(m_bufIdx, m_x, m_x);
-        }
+    	m_transform.translate(dx, dy);
+        m_x += dx;
+        m_y += dy;
     }
 
     @Override
