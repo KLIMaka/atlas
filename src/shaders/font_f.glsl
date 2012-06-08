@@ -8,7 +8,7 @@ varying vec2 tc;
 
 void main(void) {
 
-	float glyph =pow(texture2D(font, tc).r, thickness);
+	float glyph = pow(texture2D(font, tc).r, thickness);
 	vec4 c = vec4(mix(bcolor.rgb, fcolor.rgb, glyph), bcolor.a);
 	
 	gl_FragColor = c; 

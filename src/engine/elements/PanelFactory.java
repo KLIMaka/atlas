@@ -24,7 +24,10 @@ public class PanelFactory extends IDFactory {
 
     private ShaderInfo             m_shader;
 
+    protected IFloatBufferAccessor m_aOrigin;
+    protected IFloatBufferAccessor m_aAngle;
     protected IFloatBufferAccessor m_aPos;
+    protected IFloatBufferAccessor m_aSize;
     protected IFloatBufferAccessor m_aTex;
     protected IByteBufferAccessor  m_aColor;
 
@@ -46,14 +49,18 @@ public class PanelFactory extends IDFactory {
         setupIndexes();
         setupShader();
 
-        m_aPos = (IFloatBufferAccessor) m_buffer.getAccsessor(0);
-        m_aTex = (IFloatBufferAccessor) m_buffer.getAccsessor(1);
-        m_aColor = (IByteBufferAccessor) m_buffer.getAccsessor(2);
+        m_aOrigin = (IFloatBufferAccessor) m_buffer.getAccsessor(0);
+        m_aAngle = (IFloatBufferAccessor) m_buffer.getAccsessor(0, 2);
+        m_aPos = (IFloatBufferAccessor) m_buffer.getAccsessor(1);
+        m_aSize = (IFloatBufferAccessor) m_buffer.getAccsessor(1, 2);
+        m_aTex = (IFloatBufferAccessor) m_buffer.getAccsessor(2);
+        m_aColor = (IByteBufferAccessor) m_buffer.getAccsessor(3);
     }
 
     private void setupBuffer() {
 
-        m_buffer.addComponent(2, GL.GL_FLOAT, max_count, false); // pos
+        m_buffer.addComponent(3, GL.GL_FLOAT, max_count, false); // origin angle
+        m_buffer.addComponent(4, GL.GL_FLOAT, max_count, false); // pos size
         m_buffer.addComponent(2, GL.GL_FLOAT, max_count, false); // texcoord
         m_buffer.addComponent(4, GL.GL_UNSIGNED_BYTE, max_count, true); // color
         m_buffer.allocate(GL2.GL_STREAM_DRAW);
