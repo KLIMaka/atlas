@@ -227,6 +227,9 @@ public class GL2Impl implements IRender {
         hh = h;
         float[] m = { 2.0f / (float) w, 0.0f, 0.0f, -1.0f, 0.0f, -2.0f / (float) h, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f,
                 0.0f, 0.0f, 0.0f, 1.0f };
+        // float[] m = { 2.0f / (float) w, 0.0f, 0.0f, 0.0f, 0.0f, -2.0f / (float) h, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
+        // 0.0f,
+        // -1.0f, 1.0f, 0.0f, 1.0f };
         m_projection.set(m);
     }
 

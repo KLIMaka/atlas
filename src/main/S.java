@@ -20,15 +20,15 @@ import gleem.linalg.Vec4f;
 
 public class S extends AtlasEngine {
 
-    private static GLCanvas m_canvas;
+    private static GLCanvas    m_canvas;
 
-    static SpriteFactory    sprites;
-    static PanelFactory panels;
-    static Panel panel;
-    static MultilineTextRender       text;
-    static int              count = 999;
+    static SpriteFactory       sprites;
+    static PanelFactory        panels;
+    static Panel               panel;
+    static MultilineTextRender text;
+    static int                 count = 999;
 
-    static String           input = "";
+    static String              input = "";
 
     public static void main(String[] args) throws IOException {
 
@@ -71,11 +71,12 @@ public class S extends AtlasEngine {
     public void draw(IRender draw) {
         draw.clear(IRender.COLOR);
 
-        draw.trans().reset();
-        draw.trans().translate(10, 0);
-        text.draw();
-        
-        panel.setRotation(r+=0.001f);
+        // draw.trans().reset();
+        // draw.trans().translate(10, 0);
+        // text.draw();
+
+        // panel.setRotation(r += 0.001f);
+        // panel.setRect(200 - r * 10, 200);
         panels.draw(panel);
     }
 
@@ -91,12 +92,12 @@ public class S extends AtlasEngine {
     public void init(IRender drawer) {
 
         drawer.setClearColor(new Vec4f(1, 1, 1, 0.0f));
-        
+
         panels = new PanelFactory(drawer);
         panel = panels.create();
-        panel.setRect(100, 200);
-        panel.setOrigin(50, 100);
-        panel.setPos(200,300);
+        panel.setRect(200, 2);
+        // panel.setRotation(-0.4f);
+        panel.setPos(200, 200);
 
         text = new MultilineTextRender("fonts/curier.fnt", drawer);
         text.setColor(0, 0, 0, 1);

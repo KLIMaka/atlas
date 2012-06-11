@@ -44,15 +44,26 @@ public class Transformation {
     }
 
     public void translate(float x, float y, float z) {
-        //Mat4f m = new Mat4f();
-        //m.makeIdent();
-        //m.setTranslation(new Vec3f(x, y, z));
-        //m_mat.mul(m_mat, m);
-    	m_mat.setTranslation(new Vec3f(x,y,z));
+        // Mat4f m = new Mat4f();
+        // m.makeIdent();
+        // m.setTranslation(new Vec3f(x, y, z));
+        // m_mat.set(m_mat.mul(m));
+        m_mat.setTranslation(new Vec3f(x, y, z));
+        // m_mat.set(3, 0, 100);
+        // m_mat.set(3, 1, 0);
     }
 
     public void rotate(float angle) {
-        rotate(angle, 0.0f, 0.0f, 1.0f);
+        float c = (float) Math.cos(angle);
+        float s = (float) Math.sin(angle);
+        Mat4f m = new Mat4f();
+        m.makeIdent();
+        m.set(0, 0, c);
+        m.set(0, 1, -s);
+        m.set(1, 0, s);
+        m.set(1, 1, c);
+        m_mat.set(m_mat.mul(m));
+        // rotate(angle, 0.0f, 0.0f, 1.0f);
     }
 
     public void rotate(float angle, float x, float y, float z) {
