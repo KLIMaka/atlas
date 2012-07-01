@@ -28,6 +28,10 @@ public class Transformation {
         scale(scale, scale, scale);
     }
 
+    public void set(Mat4f mat) {
+        m_mat = mat;
+    }
+
     public void scale(float x, float y) {
         m_mat.set(0, 0, m_mat.get(0, 0) * x);
         m_mat.set(1, 1, m_mat.get(1, 1) * y);
@@ -54,16 +58,16 @@ public class Transformation {
     }
 
     public void rotate(float angle) {
-        float c = (float) Math.cos(angle);
-        float s = (float) Math.sin(angle);
-        Mat4f m = new Mat4f();
-        m.makeIdent();
-        m.set(0, 0, c);
-        m.set(0, 1, -s);
-        m.set(1, 0, s);
-        m.set(1, 1, c);
-        m_mat.set(m_mat.mul(m));
-        // rotate(angle, 0.0f, 0.0f, 1.0f);
+        // float c = (float) Math.cos(angle);
+        // float s = (float) Math.sin(angle);
+        // Mat4f m = new Mat4f();
+        // m.makeIdent();
+        // m.set(0, 0, c);
+        // m.set(0, 1, -s);
+        // m.set(1, 0, s);
+        // m.set(1, 1, c);
+        // m_mat.set(m_mat.mul(m));
+        rotate(angle, 0.0f, 0.0f, 1.0f);
     }
 
     public void rotate(float angle, float x, float y, float z) {
@@ -74,7 +78,9 @@ public class Transformation {
     }
 
     public float[] get() {
+        m_mat.transpose();
         m_mat.getColumnMajorData(m_data);
+        m_mat.transpose();
         return m_data;
     }
 }

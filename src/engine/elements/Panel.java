@@ -5,26 +5,56 @@ import engine.monads.IMonadID;
 import engine.monads.IMonadPos;
 import engine.monads.IMonadRect;
 import engine.transformer.Transformation;
+import gleem.linalg.Mat4f;
 
 public class Panel implements IElement, IMonadID, IMonadPos, IMonadRect, IMonadDrawable {
 
-    private PanelFactory   m_parent;
+    protected PanelFactory   m_parent;
     protected int            m_bufIdx;
 
-    private float          m_w = 1.0f, m_h = 1.0f;
-    private float          m_x, m_y;
-    private float          m_angle;
-    private float          m_ox, m_oy;
-    private int            m_idx;
+    private float            m_w         = 1.0f, m_h = 1.0f;
+    private float            m_x, m_y;
+    private float            m_angle;
+    private float            m_ox        = 0.5f, m_oy = 0.5f;
+    private int              m_idx;
 
     protected Transformation m_transform = new Transformation();
 
     protected Panel(PanelFactory parent, int idx) {
         m_parent = parent;
         m_bufIdx = idx;
-        
-        float no[] = new float[] { 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f , 1.0f };
-        m_parent.m_aOrigin.putf(m_bufIdx, no);
+
+        setOrigin(0.0f, 0.0f);
+    }
+
+    public void set(float w, float h, float x, float y, float ang) {
+        Mat4f mat = new Mat4f();
+        mat.makeIdent();
+        mat.set(0, 0, w);
+        mat.set(1, 1, h);
+
+        Mat4f rot = new Mat4f();
+        rot.makeIdent();
+        float c = (float) Math.cos(ang);
+        float s = (float) Math.sin(ang);
+        rot.set(0, 0, c);
+        rot.set(0, 1, -s);
+        rot.set(1, 0, s);
+        rot.set(1, 1, c);
+        mat.set(mat.mul(rot));
+
+        Mat4f pos = new Mat4f();
+        pos.makeIdent();
+        pos.set(3, 0, x);
+        pos.set(3, 1, y);
+
+        m_transform.set(mat.mul(pos));
+
+        m_w = w;
+        m_h = h;
+        m_x = x;
+        m_y = y;
+        m_angle = ang;
     }
 
     @Override
@@ -40,39 +70,31 @@ public class Panel implements IElement, IMonadID, IMonadPos, IMonadRect, IMonadD
 
     @Override
     public void setRect(float w, float h) {
-        m_transform.scale(w / m_w, h / m_h);
-        m_w = w;
-        m_h = h;
+        set(w, h, m_x, m_y, m_angle);
     }
 
     @Override
     public void resize(float dw, float dh) {
         float w = m_w + dw;
         float h = m_h + dh;
-        m_transform.scale(w / m_w, h / m_h);
-        m_w = w;
-        m_h = h;
+        set(w, h, m_x, m_y, m_angle);
     }
 
     @Override
     public void setOrigin(float x, float y) {
 
-        if (x != m_ox || y != m_oy) {
-            m_ox = x;
-            m_oy = y;
+        m_ox = x;
+        m_oy = y;
 
-            float nox = m_ox / m_w;
-            float noy = m_oy / m_h;
-            float no[] = new float[] { -nox, -noy, 1.0f - nox, -noy, -nox, 1.0f - noy, 1.0f - nox, 1.0f - noy };
-            m_parent.m_aOrigin.putf(m_bufIdx, no);
-        }
+        float nox = m_ox / m_w;
+        float noy = m_oy / m_h;
+        float no[] = new float[] { -nox, -noy, 1.0f - nox, -noy, -nox, 1.0f - noy, 1.0f - nox, 1.0f - noy };
+        m_parent.m_aOrigin.putf(m_bufIdx, no);
     }
 
     @Override
     public void setRotation(float angle) {
-        float da = angle - m_angle;
-        m_transform.rotate(da);
-        m_angle += da;
+        set(m_w, m_h, m_x, m_y, angle);
     }
 
     @Override
@@ -97,23 +119,19 @@ public class Panel implements IElement, IMonadID, IMonadPos, IMonadRect, IMonadD
 
     @Override
     public float angle() {
-        return 0;
+        return m_angle;
     }
 
     @Override
     public void setPos(float x, float y) {
-        float dx = x - m_x;
-        float dy = y - m_y;
-        m_transform.translate(x, y);
-        m_x += dx;
-        m_y += dy;
+        set(m_w, m_h, x, y, m_angle);
     }
 
     @Override
     public void move(float dx, float dy) {
-    	m_transform.translate(dx, dy);
         m_x += dx;
         m_y += dy;
+        set(m_w, m_h, m_x, m_y, m_angle);
     }
 
     @Override

@@ -71,12 +71,7 @@ public class S extends AtlasEngine {
     public void draw(IRender draw) {
         draw.clear(IRender.COLOR);
 
-        // draw.trans().reset();
-        // draw.trans().translate(10, 0);
-        // text.draw();
-
-        // panel.setRotation(r += 0.001f);
-        // panel.setRect(200 - r * 10, 200);
+        panel.setRotation(r += 0.001f);
         panels.draw(panel);
     }
 
@@ -95,9 +90,7 @@ public class S extends AtlasEngine {
 
         panels = new PanelFactory(drawer);
         panel = panels.create();
-        panel.setRect(200, 2);
-        // panel.setRotation(-0.4f);
-        panel.setPos(200, 200);
+        panel.set(20, 20, 200, 200, 0);
 
         text = new MultilineTextRender("fonts/curier.fnt", drawer);
         text.setColor(0, 0, 0, 1);
@@ -107,16 +100,10 @@ public class S extends AtlasEngine {
         keyboard.setKeyListener(new AtlasKeyListener() {
 
             @Override
-            public void keyTyped(char c) {
-                // TODO Auto-generated method stub
-
-            }
+            public void keyTyped(char c) {}
 
             @Override
-            public void keyReleased(KeyEvent e) {
-                // TODO Auto-generated method stub
-
-            }
+            public void keyReleased(KeyEvent e) {}
 
             @Override
             public void keyPressed(KeyEvent e) {
